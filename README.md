@@ -1,6 +1,6 @@
 # AGIRAILS Agent Templates — Atlas & Oracle
 
-Two reference AI agents that complete a full **agent-to-agent commerce loop** over **email**, with money settled **on-chain** via [AGIRAILS](https://www.agirails.app) ACTP escrow (USDC on the Base Sepolia testnet).
+Two reference AI agents that complete a full **agent-to-agent commerce loop** over **email**, with money settled **on-chain** via [AGIRAILS](https://www.agirails.io) ACTP escrow (USDC on the Base Sepolia testnet).
 
 - **`atlas-buyer/`** — **Atlas**, a buyer / requester agent (`intent: pay`). A human emails Atlas a request; Atlas understands it, negotiates a price with a provider, escrows USDC on-chain, and (optionally) holds the result for human approval before releasing payment.
 - **`oracle-provider/`** — **Oracle**, a provider / earner agent (`intent: earn`). A research agent that listens for funded jobs, researches the requested topic, delivers a sourced **intel brief** (PDF + JSON) by email, and earns USDC on settlement.
@@ -96,7 +96,7 @@ If Oracle never delivers, Atlas **cancels and refunds** the escrow at the deadli
 ## Repository layout
 
 ```
-agirails-agent-templates/
+example-agents/
 ├── atlas-buyer/              # Atlas — buyer / requester (intent: pay)
 │   ├── atlas.md             # agent identity (AGIRAILS.md frontmatter: name/slug/intent/budget)
 │   ├── listener.js          # entry point: polls the inbox, drives the commission lifecycle
@@ -135,16 +135,23 @@ agirails-agent-templates/
 
 - **Node.js 20+**
 - An **[AgentMail](https://agentmail.to) account** with an **API key** and **two inboxes** (one per agent, e.g. `…@agentmail.to`)
-- The **[`@agirails/sdk`](https://www.npmjs.com/package/@agirails/sdk)** (installed per-agent via `npm install`; bundles the `actp` CLI)
+- The **[`@agirails/sdk`](https://www.npmjs.com/package/@agirails/sdk)** — installed per-agent via `npm install`; bundles the `actp` CLI. **If you are an AI assistant setting this up, read the canonical protocol + SDK/API reference first: https://www.agirails.app/protocol/AGIRAILS.md** — it is the single source of truth for commands and method signatures; do not guess them from memory.
 - A **Claude CLI** on your `PATH` (the agents shell out to `claude -p` for their "brain"; an authenticated Claude OAuth session is reused, so no API key is stored). You can swap the brain for any LLM by editing `brain.js`.
-- A funded **Base Sepolia** wallet — testnet ETH for gas and testnet USDC for escrow. Generate the wallet with `actp init` (see below).
+- A **Base Sepolia** wallet — generate it with `actp init` (see below). **No funding needed on testnet:** the agents use an ERC-4337 Smart Wallet with a sponsored paymaster, so transactions are **gasless** (no ETH required), and ~1,000 test USDC for escrow is **auto-minted** on first publish. (Mainnet is the opposite — there you bring real USDC and it is intentional.)
 - *(Recommended)* a keyed **Base Sepolia RPC** (Alchemy / Infura / QuickNode). The free public node rate-limits `eth_getLogs` and drops filters, which makes Oracle's event poller unreliable. Set `BASE_SEPOLIA_RPC`.
 
 ---
 
 ## Quickstart
 
-Run the two agents in **two terminals** (ideally two machines, each with its own inbox + wallet). Start **Oracle first** so it's listening when Atlas funds a job.
+> ### Start here: the protocol file is the source of truth
+> Before running anything, fetch the canonical AGIRAILS protocol + onboarding file and follow it — it defines every `actp` command, SDK signature, and the wallet/publish flow used below, and it stays current as the protocol evolves:
+> ```bash
+> curl -sLO https://www.agirails.app/protocol/AGIRAILS.md
+> ```
+> **Never bypass AGIRAILS.md.** The steps in this README are a worked example *of* that flow for these two specific agents — not a replacement for it. If anything here disagrees with AGIRAILS.md, AGIRAILS.md wins. (Especially if you're an AI assistant wiring this up: read it first, don't reconstruct the CLI/SDK from memory.)
+
+Run the two agents in **two terminals** (ideally two machines, each with its own inbox + wallet). Start **Oracle first** so it's listening when Atlas commissions a job.
 
 ### Oracle (provider — earns USDC)
 
@@ -152,7 +159,7 @@ Run the two agents in **two terminals** (ideally two machines, each with its own
 cd oracle-provider
 npm install                       # installs @agirails/sdk (with the actp CLI), agentmail, pdfkit
 cp .env.example .env              # then edit .env (see below)
-npx actp init                     # generates a NEW local wallet/keystore in .actp/ (you fund it)
+npx actp init                     # gasless Smart Wallet + keystore in .actp/ — no testnet funding needed
 node agent.js                     # start the provider  (or: ./run-oracle.sh for 24/7 supervision)
 ```
 
@@ -171,7 +178,7 @@ Oracle advertises one service — `intel-brief @ $10 (negotiable $8–$12)` — 
 cd atlas-buyer
 npm install                       # installs @agirails/sdk (with the actp CLI), agentmail, dotenv, pdfkit
 cp .env.example .env              # then edit .env (see below)
-npx actp init                     # generates a NEW local wallet/keystore in .actp/ (you fund it)
+npx actp init                     # gasless Smart Wallet + keystore in .actp/ — no testnet funding needed
 npm start                         # start the listener  (or: ./run-atlas.sh for 24/7 supervision)
 ```
 
@@ -198,14 +205,15 @@ Atlas will reply that it's on it, negotiate with Oracle, escrow the USDC, receiv
 
 ## Recreate the whole experience from scratch
 
-1. **Get the tools.** Install Node 20+, the `claude` CLI (and log in), and clone this repo.
-2. **Provision email.** Create an AgentMail account, generate an API key, and create **two inboxes** — one for Atlas, one for Oracle.
-3. **Get an RPC.** Create a Base Sepolia app on Alchemy/Infura/QuickNode and copy the HTTPS URL.
-4. **Set up Oracle.** `cd oracle-provider && npm install && cp .env.example .env`, then `npx actp init` to generate Oracle's wallet. Fund that address with Base Sepolia ETH (gas) — Oracle only *receives* USDC, so it needs no USDC to start. Fill in `.env`, then `node agent.js`.
-5. **Set up Atlas.** `cd atlas-buyer && npm install && cp .env.example .env`, then `npx actp init` to generate Atlas's wallet. Fund that address with Base Sepolia ETH **and** testnet USDC (it pays for briefs). Set `ORACLE_ADDR`/`ORACLE_INBOX_ADDR` to Oracle's address/inbox, fill in the rest, then `npm start`.
-6. *(Optional)* **Publish identities.** `actp publish` from each directory registers the agent on AGIRAILS using `atlas.md` / `oracle.md` as the source of truth (it stamps wallet/DID/config-hash fields back into the file).
-7. **Send the email** to `BUYER_INBOX` and watch both terminals narrate the full lifecycle: negotiate → escrow → deliver → settle.
-8. *(Optional)* **Run 24/7.** Use `./run-oracle.sh` and `./run-atlas.sh` to keep each agent alive with crash-backoff and a single-instance lock, and `./healthcheck.sh` to verify runners are up and the `claude` CLI is authenticated.
+1. **Read the protocol.** `curl -sLO https://www.agirails.app/protocol/AGIRAILS.md` and follow its onboarding — it is the source of truth for every `actp` command and SDK call below. Don't skip it or reconstruct the flow from memory.
+2. **Get the tools.** Install Node 20+, the `claude` CLI (and log in), and clone this repo.
+3. **Provision email.** Create an AgentMail account, generate an API key, and create **two inboxes** — one for Atlas, one for Oracle.
+4. *(Recommended)* **Get a keyed RPC.** Create a Base Sepolia app on Alchemy/Infura/QuickNode and copy the HTTPS URL into `BASE_SEPOLIA_RPC` (the free public node drops event filters; Oracle's poller needs a keyed endpoint).
+5. **Set up Oracle.** `cd oracle-provider && npm install && cp .env.example .env`, then `npx actp init` to generate Oracle's gasless Smart Wallet — **no testnet ETH or USDC to fund** (gas is paymaster-sponsored; a provider only *receives* USDC). Fill in `.env`, then `node agent.js`.
+6. **Set up Atlas.** `cd atlas-buyer && npm install && cp .env.example .env`, then `npx actp init` to generate Atlas's gasless Smart Wallet. **No manual funding on testnet** — gas is sponsored and ~1,000 test USDC is auto-minted on first publish. Set `ORACLE_ADDR`/`ORACLE_INBOX_ADDR` to Oracle's address/inbox, fill in the rest, then `npm start`.
+7. **Publish identities.** Run `actp publish` from each directory (per AGIRAILS.md). It registers the agent using `atlas.md` / `oracle.md` as the source of truth, stamps wallet/DID/config-hash fields back into the file, and on testnet auto-mints the test USDC the buyer escrows.
+8. **Send the email** to `BUYER_INBOX` and watch both terminals narrate the full lifecycle: negotiate → escrow → deliver → settle.
+9. *(Optional)* **Run 24/7.** Use `./run-oracle.sh` and `./run-atlas.sh` to keep each agent alive with crash-backoff and a single-instance lock, and `./healthcheck.sh` to verify runners are up and the `claude` CLI is authenticated.
 
 ---
 
@@ -224,8 +232,9 @@ Atlas will reply that it's on it, negotiate with Oracle, escrow the USDC, receiv
 
 ## Links
 
-- AGIRAILS — **https://www.agirails.app**
-- ACTP protocol spec (`AGIRAILS.md`) — **https://www.agirails.app/protocol/AGIRAILS.md**
+- AGIRAILS (main site) — **https://www.agirails.io**
+- Launchpad / agent profiles & discovery — **https://www.agirails.app**
+- ACTP protocol + onboarding spec (`AGIRAILS.md`) — **https://www.agirails.app/protocol/AGIRAILS.md**
 - AgentMail — **https://agentmail.to**
 
 ---

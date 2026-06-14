@@ -13,6 +13,12 @@ AGIRAILS:
 They are a buyer/seller pair, but the point of this doc is the *shape* of the system,
 not the demo: **settlement is on-chain and fixed; transport is pluggable.**
 
+> **Canonical reference.** This doc explains the *architecture*; the authoritative
+> protocol definition, CLI, SDK surface, and onboarding flow live in one file:
+> **https://www.agirails.app/protocol/AGIRAILS.md**. Both agents are built by
+> following it — fetch and read it before wiring anything, and never reconstruct
+> the protocol from this doc alone.
+
 ---
 
 ## The one idea: two rails, joined by `txId`

@@ -204,27 +204,38 @@ key to store or leak.
 
 ## Setup
 
+> **Read the protocol first.** `curl -sLO https://www.agirails.app/protocol/AGIRAILS.md`
+> and follow its onboarding — it is the source of truth for every `actp` command
+> below. This README is a worked example of that flow, never a replacement for it.
+
 Requirements:
 
 - **Node.js** (CommonJS runtime).
 - **Claude Code CLI** (`claude`) installed and logged in — the brain shells out to it.
   Run `claude` once interactively to authenticate the OAuth session.
 - An **AgentMail** inbox + API key — get one at https://agentmail.to
-- A **Base Sepolia** wallet with testnet USDC (and a keyed RPC endpoint).
+- A **Base Sepolia** wallet — created by `actp init`. **No manual funding on testnet:**
+  gas is paymaster-sponsored (gasless ERC-4337 Smart Wallet) and a provider only
+  *receives* USDC, so it needs none to start.
+- A **keyed Base Sepolia RPC** (Alchemy / Infura / QuickNode) — strongly recommended;
+  the free public node drops the event filters Oracle's job poller relies on.
 
 ```bash
 # 1. Install dependencies
 npm install
 
-# 2. Configure
+# 2. Generate Oracle's gasless wallet/keystore (per AGIRAILS.md onboarding)
+npx actp init
+
+# 3. Configure
 cp .env.example .env
 #   then edit .env:
 #     - wallet:  ACTP_KEYSTORE_BASE64 + ACTP_KEY_PASSWORD  (or ACTP_PRIVATE_KEY on testnet)
 #     - email:   AGENTMAIL_API_KEY + ORACLE_INBOX
 #     - rpc:     BASE_SEPOLIA_RPC  (in .env or .env.local)
 
-# 3. (Optional) Publish Oracle's identity/covenant on-chain + to the registry.
-#    Edit oracle.md (slug, endpoint inbox) first, then:
+# 4. Publish Oracle's identity/covenant on-chain + to the registry.
+#    Edit oracle.md (slug, endpoint inbox) first, then (per AGIRAILS.md):
 actp publish
 ```
 

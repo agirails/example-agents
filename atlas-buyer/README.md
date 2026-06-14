@@ -181,14 +181,21 @@ Prerequisites:
   brain uses your existing Anthropic OAuth session — no API key.
 - An **AgentMail** account with an inbox for Atlas (and access to the provider's
   inbox). Get one at <https://agentmail.to>.
-- A funded **Base Sepolia** requester wallet (testnet USDC + a little gas) onboarded
-  to the local `actp` keystore in this directory.
+- A **Base Sepolia** requester wallet — created by `actp init` into the local
+  `actp` keystore in this directory. **No manual funding on testnet:** the wallet
+  is a gasless ERC-4337 Smart Wallet (gas is paymaster-sponsored) and ~1,000 test
+  USDC is auto-minted on first `actp publish`.
+
+> **Read the protocol first.** `curl -sLO https://www.agirails.app/protocol/AGIRAILS.md`
+> and follow its onboarding — it is the source of truth for every `actp` command
+> below. This README is a worked example of that flow, not a replacement for it.
 
 Install and configure:
 
 ```bash
-cd "Public Agents/agirails-agent-templates/atlas-buyer"
+cd atlas-buyer
 npm install
+npx actp init                 # gasless Smart Wallet + keystore (per AGIRAILS.md)
 cp .env.example .env          # then fill in ORACLE_ADDR, BUYER_WALLET, the two
                               # inboxes, and AGENTMAIL_API_KEY
 ```
