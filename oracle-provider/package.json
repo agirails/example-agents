@@ -1,0 +1,30 @@
+{
+  "name": "agirails-oracle-provider",
+  "version": "1.0.0",
+  "description": "AGIRAILS Oracle provider agent template — earns USDC on Base L2 by selling a service over ACTP escrow, with AgentMail as the email transport. Teaching reference; configure via .env (see .env.example).",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "agirails",
+    "actp",
+    "agent",
+    "ai-agent",
+    "agent-payments",
+    "escrow",
+    "usdc",
+    "base-l2",
+    "x402",
+    "agentmail"
+  ],
+  "author": "AGIRAILS",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@agirails/sdk": "^4.7.2",
+    "agentmail": "^0.5.11",
+    "pdfkit": "^0.19.1"
+  }
+}

@@ -1,0 +1,24 @@
+# Environment variables (keep .env.example)
+.env
+.env.*
+!.env.example
+
+# ACTP local state and keys
+.actp/
+*.keystore.json
+pending-publish*.json
+
+# Agent runtime state
+*-state.json
+.*-state.json
+*.pid
+.*-runner.pid
+
+# Logs
+*.log
+
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store

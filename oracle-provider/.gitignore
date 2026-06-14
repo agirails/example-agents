@@ -1,0 +1,24 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# ACTP / agent identity & keystores
+.actp/
+*.keystore.json
+pending-publish*.json
+
+# Logs
+*.log
+*.log.old
+
+# Runtime state
+*-state.json
+.*-runner.pid
+.*-delivered.json
+
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store

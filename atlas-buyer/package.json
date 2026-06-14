@@ -1,0 +1,59 @@
+{
+  "//": [
+    "─────────────────────────────────────────────────────────────────────────",
+    "Atlas (buyer) agent — npm manifest for a teaching template.",
+    "",
+    "Atlas is an email-driven AI BUYER. The end-to-end flow this package wires up:",
+    "  1. listener.js  — long-running entry point. Polls Atlas's own AgentMail",
+    "                    inbox (the `agentmail` SDK) for new work requests from a",
+    "                    human, and reconciles durable state in .atlas-state.json",
+    "                    on every (re)start so no escrow is ever stranded.",
+    "  2. brain.js     — understands the request and decides what to buy by shelling",
+    "                    out to the `claude` CLI (must be on PATH; see CLAUDE_BIN).",
+    "  3. negotiate.js — haggles a price with the provider agent over email.",
+    "  4. escrow.js    — locks USDC in an on-chain ACTP escrow via @agirails/sdk,",
+    "                    then HOLDS it in review mode until the human replies",
+    "                    'approve', and finally SETTLES (releases) payment to the",
+    "                    provider on-chain. Refunds automatically at the deadline.",
+    "  5. commerce.js / pdf.js / state.js — pricing helpers, brief→PDF rendering,",
+    "                    and the durable state store used by the reconciler.",
+    "",
+    "Run it with `npm start` (single run) or via run-atlas.sh (24/7 supervisor",
+    "with crash backoff). NO secrets live in this file — wallet addresses, inbox",
+    "addresses and the AgentMail API key are all read from .env at runtime.",
+    "See .env.example for the full list of required environment variables.",
+    "─────────────────────────────────────────────────────────────────────────"
+  ],
+  "name": "atlas-buyer",
+  "version": "1.0.0",
+  "description": "Atlas — an email-driven AI buyer agent. Listens on an AgentMail inbox, negotiates with provider agents, and pays via on-chain ACTP/USDC escrow on Base. A teaching template for the AGIRAILS agent economy.",
+  "main": "listener.js",
+  "type": "commonjs",
+  "scripts": {
+    "//start": "The agent's real entry point. listener.js runs main() when invoked directly (require.main === module) and polls the AgentMail inbox forever.",
+    "start": "node listener.js",
+    "//test": "Two plain-Node test scripts (no test framework needed). Unit tests cover pricing/state logic; integration tests exercise the escrow lifecycle end-to-end.",
+    "test": "node test-unit.js && node test-integration.js",
+    "test:unit": "node test-unit.js",
+    "test:integration": "node test-integration.js"
+  },
+  "keywords": [
+    "agirails",
+    "actp",
+    "ai-agent",
+    "agent-commerce",
+    "escrow",
+    "usdc",
+    "base",
+    "agentmail",
+    "buyer-agent"
+  ],
+  "author": "AGIRAILS",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@agirails/sdk": "^4.7.2",
+    "agentmail": "^0.5.11",
+    "dotenv": "^17.4.2",
+    "pdfkit": "^0.19.1"
+  }
+}

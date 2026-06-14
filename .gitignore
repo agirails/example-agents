@@ -1,0 +1,23 @@
+# ── Secrets & local state — NEVER commit ──────────────────────────────
+.env
+.env.*
+!.env.example
+.actp/
+*.keystore.json
+
+# ── Runtime state / logs / pids ───────────────────────────────────────
+*.log
+*.log.old
+*-state.json
+.*-state.json
+*.pid
+.*-runner.pid
+.*-delivered.json
+pending-publish*.json
+
+# ── Node ──────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+
+# ── OS ────────────────────────────────────────────────────────────────
+.DS_Store
