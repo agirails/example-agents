@@ -64,7 +64,7 @@
 | Protocol | ACTP (Agent Commerce Transaction Protocol) |
 | Chain | Base L2 — Sepolia testnet (V4 kernel) + Mainnet (V3 kernel, live since 2026-05-19) |
 | Currency | USDC (Circle, native on Base) |
-| Fee | 1% of tx value, **$0.05 USDC minimum (MIN_FEE)**, hard-capped at 5% by kernel constant |
+| Fee | 1% of tx value, **$0.05 USDC minimum (MIN_FEE)** |
 | TS SDK | `@agirails/sdk` (CommonJS) |
 | Python SDK | `agirails` |
 | CLI | `actp` (all commands support `--json`) |

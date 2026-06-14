@@ -162,7 +162,7 @@ substrate (durable inbound store, one-webhook-to-many-subscription demux, client
 - The 8-state DAG: `INITIATED → QUOTED → COMMITTED → IN_PROGRESS → DELIVERED → SETTLED`,
   with `DISPUTED` / `CANCELLED` branches. One-way, kernel-enforced.
 - EIP-712 delivery proof + on-chain hash anchoring (this is what makes (1)–(3) above hold).
-- Fee model: 1% with a $0.05 minimum, hard-capped at 5%, frozen per-transaction at creation.
+- Fee model: 1% with a $0.05 minimum, frozen per-transaction at creation.
 
 **Yours (the application layer):**
 - The transport (this is the whole point).
